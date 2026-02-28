@@ -1,6 +1,6 @@
 # Skills
 
-A collection of Claude Code skills.
+A collection of agent skills.
 
 ## Available Skills
 
