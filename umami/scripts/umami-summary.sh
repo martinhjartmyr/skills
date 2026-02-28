@@ -116,6 +116,10 @@ START_S=$((NOW_S - 86400))
 NOW_MS=$((NOW_S * 1000))
 START_MS=$((START_S * 1000))
 
+PREV_START_S=$((START_S - 86400))
+PREV_START_MS=$((PREV_START_S * 1000))
+PREV_END_MS=$((START_S * 1000))
+
 # --- Fetch data for each website ---
 
 RESULTS="[]"
@@ -142,6 +146,17 @@ for i in $(seq 0 $((SITE_COUNT - 1))); do
     }')
 
     ENTRY=$(echo "$ENTRY" "$STATS" | jq -s '.[0] + .[1]')
+
+    PREV_STATS=$(api_get "${UMAMI_API_URL}/api/websites/${SITE_ID}/stats?startAt=${PREV_START_MS}&endAt=${PREV_END_MS}")
+    PREV_STATS=$(echo "$PREV_STATS" | jq '{
+      prev_pageviews: (if .pageviews | type == "object" then .pageviews.value else .pageviews end // 0),
+      prev_visitors: (if .visitors | type == "object" then .visitors.value else .visitors end // 0),
+      prev_visits: (if .visits | type == "object" then .visits.value else .visits end // 0),
+      prev_bounces: (if .bounces | type == "object" then .bounces.value else .bounces end // 0),
+      prev_totaltime: (if .totaltime | type == "object" then .totaltime.value else .totaltime end // 0)
+    }')
+
+    ENTRY=$(echo "$ENTRY" "$PREV_STATS" | jq -s '.[0] + .[1]')
   fi
 
   ACTIVE_RESPONSE=$(api_get "${UMAMI_API_URL}/api/websites/${SITE_ID}/active")
@@ -163,22 +178,29 @@ if [[ "$ACTIVE_ONLY" == "true" ]]; then
 else
   SUMMARY=$(echo "$RESULTS" | jq '{
     pageviews: [.[].pageviews] | add,
+    prev_pageviews: [.[].prev_pageviews] | add,
     visitors: [.[].visitors] | add,
+    prev_visitors: [.[].prev_visitors] | add,
     visits: [.[].visits] | add,
+    prev_visits: [.[].prev_visits] | add,
     bounces: [.[].bounces] | add,
+    prev_bounces: [.[].prev_bounces] | add,
     totaltime: [.[].totaltime] | add,
+    prev_totaltime: [.[].prev_totaltime] | add,
     active: [.[].active] | add
   }')
 
+  PREV_START_ISO=$(date -u -r "$PREV_START_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d "@$PREV_START_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "${PREV_START_S}")
   START_ISO=$(date -u -r "$START_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d "@$START_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "${START_S}")
   END_ISO=$(date -u -r "$NOW_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d "@$NOW_S" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "${NOW_S}")
 
   OUTPUT=$(jq -n \
+    --arg prev_start "$PREV_START_ISO" \
     --arg start "$START_ISO" \
     --arg end "$END_ISO" \
     --argjson websites "$RESULTS" \
     --argjson summary "$SUMMARY" \
-    '{period: {start: $start, end: $end}, websites: $websites, summary: $summary}')
+    '{period: {prev_start: $prev_start, start: $start, end: $end}, websites: $websites, summary: $summary}')
 fi
 
 echo "$OUTPUT"

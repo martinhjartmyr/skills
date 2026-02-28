@@ -33,14 +33,15 @@ If `UMAMI_API_KEY` is set, it takes precedence over username/password.
 2. Parse the JSON output.
 3. Format as a markdown table:
 
-| Website    | Domain           | Pageviews | Visitors | Visits  | Bounces | Avg Time | Active |
-| ---------- | ---------------- | --------- | -------- | ------- | ------- | -------- | ------ |
-| My Blog    | blog.example.com | 1,234     | 567      | 890     | 123     | 45s      | 3      |
-| **Totals** |                  | **1,234** | **567**  | **890** | **123** | **45s**  | **3**  |
+| Website    | Domain           | Pageviews       | Visitors      | Visits        | Bounces       | Avg Time      | Active |
+| ---------- | ---------------- | --------------- | ------------- | ------------- | ------------- | ------------- | ------ |
+| My Blog    | blog.example.com | 1,234 (980)     | 567 (510)     | 890 (801)     | 123 (110)     | 45s (38s)     | 3      |
+| **Totals** |                  | **1,234 (980)** | **567 (510)** | **890 (801)** | **123 (110)** | **45s (38s)** | **3**  |
 
+- Show previous period values in parentheses after each metric (e.g. "1,234 (980)" means 1,234 current, 980 previous).
 - Format numbers with commas for readability.
 - Convert `totaltime` to human-readable duration (e.g. "1m 23s").
-- Calculate average time as `totaltime / visits` for each site.
+- Calculate average time as `totaltime / visits` for each site, using `prev_totaltime / prev_visits` for the previous period.
 - Bold the totals row.
 
 ## Workflow: Active Users Only
