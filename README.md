@@ -4,10 +4,11 @@ A collection of agent skills.
 
 ## Available Skills
 
-| Skill                     | Description                           |
-| ------------------------- | ------------------------------------- |
-| [umami](umami/SKILL.md)   | Fetch analytics from Umami            |
-| [overvy](overvy/SKILL.md) | Interact with the Overvy kanban board |
+| Skill                           | Description                           |
+| ------------------------------- | ------------------------------------- |
+| [umami](umami/SKILL.md)         | Fetch analytics from Umami            |
+| [overvy](overvy/SKILL.md)       | Interact with the Overvy kanban board |
+| [notifery](notifery/SKILL.md)   | Send notifications via Notifery       |
 
 ## Install
 
@@ -27,4 +28,10 @@ Overvy:
 
 ```
 npx skills add martinhjartmyr/skills --skill overvy
+```
+
+Notifery:
+
+```
+npx skills add martinhjartmyr/skills --skill notifery
 ```
